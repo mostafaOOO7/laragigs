@@ -48,6 +48,7 @@ Route::get('/posts', function(){
 // Access API endpoint form URL or Postman
 http://laragigs.test/api/posts
 ````
+
 ### 👁 Basic View & Passing Data
 ```
 Route::get('/', function () {
@@ -69,6 +70,7 @@ Route::get('/', function () {
     // return view('listing.php');
 });
 ```
+
 Create a view page in the resource folder `resources > views > listings.php`
 ```
 <h1><?php echo $heading; ?></h1>
@@ -103,7 +105,6 @@ Create a new file in Models folder `app > Models > Listings.php`
 namespace App\Models;
 
 class Listing {
-
   // All Listing
   public static function all(){
     return [
@@ -130,7 +131,6 @@ class Listing {
       }
     }
   }
-
 }
 ```
 
@@ -167,4 +167,462 @@ We can db connection setup in `config > database.php` or `.env` files modify
 Use MySQL Cheat Sheet [Brad Traversy](https://gist.github.com/bradtraversy/c831baaad44343cc945e76c2e30927b3)
 
 ### Creating Database Migration
+Create listing table migration
+```
+php artisan make:migration create_listings_table
+```
+Modify `create_listings_table` migration file from `database > migrations > filename`
+```
+public function up(): void
+    {
+        Schema::create('listings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title');
+            $table->string('tags');
+            $table->string('logo')->nullable();
+            $table->string('company');
+            $table->string('location');
+            $table->string('email');
+            $table->string('website');
+            $table->longText('description');
+            $table->timestamps();
+        });
+    }
+```
+And run this command
+```
+php artisan migrate
+```
+
+### Database Seeding
+User seeder from `database > seeders > DatabaseSeeder.php`
+```
+\App\Models\User::factory(10)->create();
+```
+Create 10 users using from `database > factories > UserFactory.php`
+```
+public function definition(): array
+    {
+        return [
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'remember_token' => Str::random(10),
+        ];
+    }
+```
+Run this command for seed
+```
+php artisan db:seed
+```
+
+### Create an Eloquent Model
+```
+php artisan make:model Listing
+```
+
+Modify seeder from `database > seeders > DatabaseSeeder.php` file
+```
+// Manually create listing data
+Listing::create([
+        'title' => 'Laravel Senior Developer',
+        'tags'  => 'Laravel, JavaScript',
+        'company'  => 'Acme Corp',
+        'location'  => 'Boston, MA',
+        'email'  => 'email@email.com',
+        'website'  => 'https://www.acme.com',
+        'description'  => 'Lorem Ipsum is simply dummy text'
+    ]);
+Listing::create([
+        'title' => 'Full-Stack Engineer',
+        'tags'  => 'Laravel, JavaScript, API, Backend',
+        'company'  => 'Acme Corp',
+        'location'  => 'Boston, MA',
+        'email'  => 'email@email.com',
+        'website'  => 'https://www.acme.com',
+        'description'  => 'Lorem Ipsum is simply dummy text'            
+    ]);
+```
+
+Using this command line for seeding
+```
+php artisan migrate:refresh --seed
+```
+
+### Creating a Factory
+```
+php artisan make:factory ListingFactory
+```
+
+Modify the listing factory from the `database > factories > ListingFactory.php` file
+```
+public function definition(): array
+    {
+        return [
+            'title' => $this->faker->sentence(),
+            'tags'  => 'Laravel, JavaScript, API, Backend',
+            'company'  => $this->faker->company(),
+            'email'  => $this->faker->companyEmail(),
+            'location'  => $this->faker->city(),
+            'website'  => $this->faker->url(),
+            'description'  => $this->faker->paragraph(5)
+        ];
+    }
+```
+
+Creating fake data modify `database > seeders > DatabaseSeeder.php` file in the `run` method
+```
+use App\Models\Listing;
+....
+// This line use `run()` mehtod
+Listing::factory(6)->create();
+```
+
+### Create a Layout & Sections
+Create a layout file in `views > layout.blade.php`
+```
+<html>
+    <body>
+        @yield('content)
+    </body>
+</html>
+```
+
+Modify listings and listing blade files from the `views`
+```
+@extends('layout')
+    @section('content')
+    ......
+    @endsection
+```
+Adding the Theme HTML in the blade file, And creating `header.blade.php`, `footer.blade.php`, `search.blade.php`  in the `partials` folder
+
+Include `search.blade.php` in the `listings.blade.php` files using this directives
+```
+@include('partials.search)
+```
+
+### Route Model Binding
+```
+// Single Listing
+Route::get('listings/{listing}', function(Listing $listing){
+    return view('listings', ['listing' => $listing]);
+});
+```
+
+### Blade Components
+Create `listing-card.blade.php` component file in `database > views > components` folder
+
+```
+{{-- listing props access the variables --}}
+@props(['listing'])
+
+{{-- Blade Component --}}
+<x-card class="">
+.....
+</x-card>
+```
+
+Modify the `listings.blade.php` file foreach loop content in the `listing-card.blade.php` component
+```
+{{-- listing props access the valuables --}}
+@props(['listing'])
+
+{{-- Blade Component --}}
+<x-card class="">
+...
+    @foreach($listings as $listing)
+        {{-- component @props dirctivs valiable passing --}}
+        <x-listing-card :listing="$listing" />
+    @endforeach
+...
+</x-card>
+```
+
+Create `card.blade.php` in the components folder for using css class attributes content
+```
+{{-- Component Attributes  --}}
+<div {{ $attributes->merge(['class' => 'bg-gray-50 border border-gray-200 rounded p-6']) }}>
+    {{ $slot }}
+</div>
+```
+Tags Components same as above
+
+### Controllers
+```
+php artisan make:controller ListingController
+```
+
+Modify ListingController class
+```
+// Import model
+use App\Models\Listing;
+...
+class ListingController extends Controller
+{
+    // Show all listing
+    public function index() {        
+        return view('listings', [            
+            'listings' => Listing::all()
+        ]);
+    }
+
+    // Show single listing
+    public function show(Listing $listing) {
+        return view('listing', [
+            'listing' => $listing
+        ]);
+    }
+}
+```
+
+Modify routes file `web.php`
+```
+// All Listing
+Route::get('/', [ListingController::class, 'index']);
+// Single Listing
+Route::get('/listings/{listing}', [ListingController::class, 'show']);
+```
+
+### Tag Filter
+Modify `app > Models > Listing.php` file
+```
+class Listing extends Model
+{
+    use HasFactory;
+
+    public function scopeFilter($query, array $filters)
+    {
+        if($filters['tag'] ?? false) {
+            $query->where('tags', 'like', '%'.request('tag').'%');
+        }
+    }
+}
+```
+
+Modify ListingController class
+```
+// Import model
+use App\Models\Listing;
+...
+class ListingController extends Controller
+{
+    // Show all listing
+    public function index() {        
+        return view('listing.index', [            
+            'listings' => Listing::latest()->filter(request(['tag']))->get()
+        ]);
+    }
+}
+```
+
+### Search Filter
+Modify `app > Models > Listing.php` file
+```
+class Listing extends Model
+{
+    use HasFactory;
+
+    public function scopeFilter($query, array $filters)
+    {
+        // Tag filter
+        if($filters['tag'] ?? false) {
+            $query->where('tags', 'like', '%'.request('tag').'%');
+        }
+
+        // Search Filter
+        if($filters['search'] ?? false){ // It this is not false
+            $query->where('title', 'like', '%'.request('search').'%')
+            ->orWhere('description', 'like', '%'.request('search').'%')
+            ->orWhere('tags', 'like', '%'.request('search').'%');
+        }
+    }
+}
+```
+
+### Clockwork Package
+Add chrome extension from chrome web store `Clockwork`
+
+After extension add run this command
+```
+$ composer require itsgoingd/clockwork
+```
+Open dev tools and click Clockwork tab
+
+
+### Create a Listing Form
+Create a method in ListingController `create`
+```
+public function create() {
+    return view('listing.create);
+}
+```
+
+Modify in the route file `web.php`
+```
+// Show Create Form
+Route::get('/listings/create', [ListingController::class, 'create']);
+```
+
+Create a listing form file in the `resources > views > listings` folder
+```
+<form method="POST" action="/listings" enctype="multipart/form-data">
+    @csrf
+
+    <input type="text" class="border border-gray-200 rounded p-2 w-full" name="title" value="{{old('title')}}"
+                    placeholder="Example: Senior Laravel Developer" />
+    @error('title')
+        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+    @enderror
+</form>
+```
+            
+### Validation & Store Listing
+Modify in the route file `web.php`
+```
+// Store Listing Data
+Route::post('/listings', [ListingController::class, 'store']);
+```
+
+Create a listing validation form in ListingController class
+```
+// Store listing
+public function store(Request $request) {        
+    $formFields = $request->validate([
+        'title' => 'required',
+        'company' => ['required', Rule::unique('listings', 'company')],
+        'location' => 'required',
+        'website' => 'required',
+        'email' => ['required', 'email'],
+        'tags' => 'required',
+        'description' => 'required',
+    ]);
+
+    // Insert to DB
+    Listing::create($formFields);
+
+    return redirect('/');
+}
+```
+
+### Mass Assignment Rule
+Modify the `Listing` Model class
+```
+protected $fillable = ['title', 'company', 'location', 'email', 'website', 'tags', 'description'];
+```
+
+If you do not guard to model class go to `app > Providers > AppServiceProvider.php` class `boot()`
+```
+use Illuminate\Database\Eloquent\Model;
+....
+class ...
+    public function boot(): void
+    {
+        Model::unguard();
+    }
+```
+
+### Flash Messages
+```
+// Return with a flash message set
+return redirect('/')->with('message', 'Listing created successfully!');
+```
+Create `flash-message.blade.php` in the components folder
+```
+@if (session()->has('message'))
+    <div class="fixed top-0 left-1/2 tranform -translate-x-1/2 bg-laravel text-white px-48 py-3">
+        <p>
+            {{ session('message') }}
+        </p>
+    </div>
+@endif
+```
+Put it anywhere in the layout within the footer of the body tag
+```
+<x-flash-message>
+```
+
+### Alpine.js For Message Removal
+Put this script in the header tag
+```
+<script src="//unpkg.com/alpinejs" defer></script>
+```
+Modify `flash-message.blade.php` in the components folder
+```
+@if (session()->has('message'))
+    <div x-data="{show: true}" x-init="setTimeout(() => show = false, 3000)" x-show="show" class="fixed top-0 left-1/2 tranform -translate-x-1/2 bg-laravel text-white px-48 py-3">
+        <p>
+            {{ session('message') }}
+        </p>
+    </div>
+@endif
+```
+
+### Pagination
+Modify the `ListingController` class `index` method
+```
+return view('listings.index', [
+            'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6)
+            // 'listings' => Listing::simplePaginate()
+        ]);
+```
+Modify the `index.blade.php` view file in `app > resources > listing` folder
+```
+<x-layout>
+    ....
+    <div class="">
+        {{$listing->links()}}
+    </div>
+</x-layout>
+```
+Pagination Service Provider Publish, Choose a number & enter
+```
+php artisan vendor:publish
+```
+Generate `vendor/pagination` folder pagination style
+
+Using this style open the `AppServiceProvider.php` class in the `boot()` method
+```
+public function boot() {
+    // See Documentation
+    Paginator::useBootstrapFive(); 
+}
+```
+
+### File Upload
+Open the `create.blade.php` file and modify this code
+```
+<form method="POST" action="/listings" enctype="multipart/form-data">
+    @csrf
+
+    <div class="mb-6">
+        <label for="logo" class="inline-block text-lg mb-2">
+            Company Logo
+        </label>
+        <input type="file" class="border border-gray-200 rounded p-2 w-full" name="logo" />
+        @error('logo')
+            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+</form>
+```
+To store image files in the storage public folder `config > filesystems.php` 
+```
+'default' => env('FILESYSTEM_DISK', 'public')
+```
+
+Modify the `ListingController` class in the `store` method after the `$formFields` array
+```
+// Upload Logo and Storage public folder
+if ($request->hasFile('logo')) {
+    $formFields['logo'] = $request->file('logo')->store('logos', 'public');
+}
+```
+
+Public folder directly accessible command
+```
+php artisan storage:link
+```
 
