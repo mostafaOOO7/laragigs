@@ -14,7 +14,7 @@ laravel new laragigs
 ```
 
 ### 🔗 Routing & Responses
-```
+```php
 // Custom Header
 Route::get('/hello', function(){
     return response('<h1>Hello World</h1>', 200)
@@ -34,7 +34,7 @@ Route::get('/search', function(Request $request){
 });
 ```
 ### 📱 API Routing
-```
+```php
 Route::get('/posts', function(){
     return response()->json([
         'posts' => [
@@ -50,7 +50,7 @@ http://laragigs.test/api/posts
 ````
 
 ### 👁 Basic View & Passing Data
-```
+```php
 Route::get('/', function () {
     return view('listings', [
         'heading' => 'Latest Listing',
@@ -72,7 +72,7 @@ Route::get('/', function () {
 ```
 
 Create a view page in the resource folder `resources > views > listings.php`
-```
+```php
 <h1><?php echo $heading; ?></h1>
 <?php foreach($lisitng as $listing): ?>
     <h2><?php echo $listing['title]; ?></h2>
@@ -82,7 +82,7 @@ Create a view page in the resource folder `resources > views > listings.php`
 
 ### 🥽 Blade Templates & Basic Directives
 Rename listing.php to `resources > views > listings.blade.php`
-```
+```php
 <h1>{{$heading}}</h1>
 
 @unless(count($listing) == 0)
@@ -100,8 +100,7 @@ Rename listing.php to `resources > views > listings.blade.php`
 ### Creating a Basic Model
 Create a new file in Models folder `app > Models > Listings.php`
 
-```
-<?php
+```php
 namespace App\Models;
 
 class Listing {
@@ -135,7 +134,7 @@ class Listing {
 ```
 
 Modify in routes folder `routes > web.php`
-```
+```php
 use App\Models\Listing;
 .....
 .......
@@ -156,7 +155,7 @@ Route::get('/listings/{id}', function($id) {
 ```
 
 Create a new file in the View folder `resources > view > Listing.blade.php` for details listing
-```
+```php
 <h2>{{$listing['title]}}</h2>
 <p>{{$listing['description]}}</p>
 ```
@@ -172,7 +171,7 @@ Create listing table migration
 php artisan make:migration create_listings_table
 ```
 Modify `create_listings_table` migration file from `database > migrations > filename`
-```
+```php
 public function up(): void
     {
         Schema::create('listings', function (Blueprint $table) {
@@ -197,11 +196,11 @@ php artisan migrate
 
 ### Database Seeding
 User seeder from `database > seeders > DatabaseSeeder.php`
-```
+```php
 \App\Models\User::factory(10)->create();
 ```
 Create 10 users using from `database > factories > UserFactory.php`
-```
+```php
 public function definition(): array
     {
         return [
@@ -224,7 +223,7 @@ php artisan make:model Listing
 ```
 
 Modify seeder from `database > seeders > DatabaseSeeder.php` file
-```
+```php
 // Manually create listing data
 Listing::create([
         'title' => 'Laravel Senior Developer',
@@ -257,7 +256,7 @@ php artisan make:factory ListingFactory
 ```
 
 Modify the listing factory from the `database > factories > ListingFactory.php` file
-```
+```php
 public function definition(): array
     {
         return [
@@ -273,7 +272,7 @@ public function definition(): array
 ```
 
 Creating fake data modify `database > seeders > DatabaseSeeder.php` file in the `run` method
-```
+```php
 use App\Models\Listing;
 ....
 // This line use `run()` mehtod
@@ -282,7 +281,7 @@ Listing::factory(6)->create();
 
 ### Create a Layout & Sections
 Create a layout file in `views > layout.blade.php`
-```
+```php
 <html>
     <body>
         @yield('content)
@@ -291,7 +290,7 @@ Create a layout file in `views > layout.blade.php`
 ```
 
 Modify listings and listing blade files from the `views`
-```
+```php
 @extends('layout')
     @section('content')
     ......
@@ -300,12 +299,12 @@ Modify listings and listing blade files from the `views`
 Adding the Theme HTML in the blade file, And creating `header.blade.php`, `footer.blade.php`, `search.blade.php`  in the `partials` folder
 
 Include `search.blade.php` in the `listings.blade.php` files using this directives
-```
+```php
 @include('partials.search)
 ```
 
 ### Route Model Binding
-```
+```php
 // Single Listing
 Route::get('listings/{listing}', function(Listing $listing){
     return view('listings', ['listing' => $listing]);
@@ -315,7 +314,7 @@ Route::get('listings/{listing}', function(Listing $listing){
 ### Blade Components
 Create `listing-card.blade.php` component file in `database > views > components` folder
 
-```
+```php
 {{-- listing props access the variables --}}
 @props(['listing'])
 
@@ -326,7 +325,7 @@ Create `listing-card.blade.php` component file in `database > views > components
 ```
 
 Modify the `listings.blade.php` file foreach loop content in the `listing-card.blade.php` component
-```
+```php
 {{-- listing props access the valuables --}}
 @props(['listing'])
 
@@ -342,7 +341,7 @@ Modify the `listings.blade.php` file foreach loop content in the `listing-card.b
 ```
 
 Create `card.blade.php` in the components folder for using css class attributes content
-```
+```php
 {{-- Component Attributes  --}}
 <div {{ $attributes->merge(['class' => 'bg-gray-50 border border-gray-200 rounded p-6']) }}>
     {{ $slot }}
@@ -356,7 +355,7 @@ php artisan make:controller ListingController
 ```
 
 Modify ListingController class
-```
+```php
 // Import model
 use App\Models\Listing;
 ...
@@ -379,7 +378,7 @@ class ListingController extends Controller
 ```
 
 Modify routes file `web.php`
-```
+```php
 // All Listing
 Route::get('/', [ListingController::class, 'index']);
 // Single Listing
@@ -388,7 +387,7 @@ Route::get('/listings/{listing}', [ListingController::class, 'show']);
 
 ### Tag Filter
 Modify `app > Models > Listing.php` file
-```
+```php
 class Listing extends Model
 {
     use HasFactory;
@@ -403,7 +402,7 @@ class Listing extends Model
 ```
 
 Modify ListingController class
-```
+```php
 // Import model
 use App\Models\Listing;
 ...
@@ -420,7 +419,7 @@ class ListingController extends Controller
 
 ### Search Filter
 Modify `app > Models > Listing.php` file
-```
+```php
 class Listing extends Model
 {
     use HasFactory;
@@ -454,20 +453,20 @@ Open dev tools and click Clockwork tab
 
 ### Create a Listing Form
 Create a method in ListingController `create`
-```
+```php
 public function create() {
     return view('listing.create);
 }
 ```
 
 Modify in the route file `web.php`
-```
+```php
 // Show Create Form
 Route::get('/listings/create', [ListingController::class, 'create']);
 ```
 
 Create a listing form file in the `resources > views > listings` folder
-```
+```php
 <form method="POST" action="/listings" enctype="multipart/form-data">
     @csrf
 
@@ -481,13 +480,13 @@ Create a listing form file in the `resources > views > listings` folder
             
 ### Validation & Store Listing
 Modify in the route file `web.php`
-```
+```php
 // Store Listing Data
 Route::post('/listings', [ListingController::class, 'store']);
 ```
 
 Create a listing validation form in ListingController class
-```
+```php
 // Store listing
 public function store(Request $request) {        
     $formFields = $request->validate([
@@ -509,12 +508,12 @@ public function store(Request $request) {
 
 ### Mass Assignment Rule
 Modify the `Listing` Model class
-```
+```php
 protected $fillable = ['title', 'company', 'location', 'email', 'website', 'tags', 'description'];
 ```
 
 If you do not guard to model class go to `app > Providers > AppServiceProvider.php` class `boot()`
-```
+```php
 use Illuminate\Database\Eloquent\Model;
 ....
 class ...
@@ -525,12 +524,12 @@ class ...
 ```
 
 ### Flash Messages
-```
+```php
 // Return with a flash message set
 return redirect('/')->with('message', 'Listing created successfully!');
 ```
 Create `flash-message.blade.php` in the components folder
-```
+```php
 @if (session()->has('message'))
     <div class="fixed top-0 left-1/2 tranform -translate-x-1/2 bg-laravel text-white px-48 py-3">
         <p>
@@ -540,17 +539,17 @@ Create `flash-message.blade.php` in the components folder
 @endif
 ```
 Put it anywhere in the layout within the footer of the body tag
-```
+```php
 <x-flash-message>
 ```
 
 ### Alpine.js For Message Removal
 Put this script in the header tag
-```
+```php
 <script src="//unpkg.com/alpinejs" defer></script>
 ```
 Modify `flash-message.blade.php` in the components folder
-```
+```php
 @if (session()->has('message'))
     <div x-data="{show: true}" x-init="setTimeout(() => show = false, 3000)" x-show="show" class="fixed top-0 left-1/2 tranform -translate-x-1/2 bg-laravel text-white px-48 py-3">
         <p>
@@ -562,14 +561,14 @@ Modify `flash-message.blade.php` in the components folder
 
 ### Pagination
 Modify the `ListingController` class `index` method
-```
+```php
 return view('listings.index', [
             'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6)
             // 'listings' => Listing::simplePaginate()
         ]);
 ```
 Modify the `index.blade.php` view file in `app > resources > listing` folder
-```
+```php
 <x-layout>
     ....
     <div class="">
@@ -584,7 +583,7 @@ php artisan vendor:publish
 Generate `vendor/pagination` folder pagination style
 
 Using this style open the `AppServiceProvider.php` class in the `boot()` method
-```
+```php
 public function boot() {
     // See Documentation
     Paginator::useBootstrapFive(); 
@@ -593,7 +592,7 @@ public function boot() {
 
 ### File Upload
 Open the `create.blade.php` file and modify this code
-```
+```php
 <form method="POST" action="/listings" enctype="multipart/form-data">
     @csrf
 
@@ -609,12 +608,12 @@ Open the `create.blade.php` file and modify this code
 </form>
 ```
 To store image files in the storage public folder `config > filesystems.php` 
-```
+```php
 'default' => env('FILESYSTEM_DISK', 'public')
 ```
 
 Modify the `ListingController` class in the `store` method after the `$formFields` array
-```
+```php
 // Upload Logo and Storage public folder
 if ($request->hasFile('logo')) {
     $formFields['logo'] = $request->file('logo')->store('logos', 'public');
